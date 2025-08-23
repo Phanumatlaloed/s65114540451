@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แดชบอร์ดแอดมิน | MyShop</title>
+    
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'styles/admin_dashboard.css' %}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- เมนูด้านบน -->
+        <nav class="admin-navbar">
+            <h2><i class="fas fa-clipboard-list"></i> แดชบอร์ดแอดมิน</h2>
+            <div class="nav-links">
+                <a href="{% url 'admin_withdrawals' %}" class="btn"><i class="fas fa-wallet"></i> การถอนเงิน</a>
+                <a href="{% url 'admin_performance' %}" class="btn"><i class="fas fa-chart-line"></i> รายงานประสิทธิภาพ</a>
+                <a href="{% url 'admin_logout' %}" class="btn logout-btn"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
+            </div>
+        </nav>
+        
+        <!-- แจ้งเตือน -->
+        {% if messages %}
+            <div class="message-box">
+                {% for message in messages %}
+                    <p class="alert-message">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <!-- สถิติสรุป -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-value">{{ total_users|default:"0" }}</div>
+                <div class="stat-label">ผู้ใช้งานทั้งหมด</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-store"></i></div>
+                <div class="stat-value">{{ total_shops|default:"0" }}</div>
+                <div class="stat-label">ร้านค้า</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                <div class="stat-value">{{ orders_today|default:"0" }}</div>
+                <div class="stat-label">ออเดอร์วันนี้</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-flag"></i></div>
+                <div class="stat-value">{{ reported_posts|length|default:"0" }}</div>
+                <div class="stat-label">โพสต์ที่ถูกรายงาน</div>
+            </div>
+        </div>
+        
+        <!-- รายการโพสต์ที่ถูกรายงาน -->
+        <div class="card">
+            <h3><i class="fas fa-flag"></i> โพสต์ที่ถูกรายงาน</h3>
+            {% if reported_posts %}
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>โพสต์</th>
+                            <th>รายงานโดย</th>
+                            <th>เหตุผล</th>
+                            <th>การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reported_posts %}
+                        <tr>
+                            <td>{{ report.post.content }}</td>
+                            <td>{{ report.reported_by.username }}</td>
+                            <td>{{ report.get_reason_display }}</td>
+                            <td>
+                                <form method="post" action="{% url 'delete_reported_post' report.post.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn delete-btn"><i class="fas fa-trash"></i> ลบโพสต์</button>
+                                </form>
+                                <form method="POST" action="{% url 'cancel_reported_post' report.post.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit">ยกเลิกการรายงาน</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="no-report-text"><i class="fas fa-check-circle"></i> ไม่มีโพสต์ที่ถูกรายงานในขณะนี้</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

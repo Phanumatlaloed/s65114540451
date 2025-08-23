@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สมัครแอดมิน | MyShop</title>
+
+    <!-- เชื่อมโยงไฟล์ CSS -->
+    <link rel="stylesheet" href="{% static 'styles/admin_register.css' %}">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-box">
+            <!-- โลโก้ -->
+            <div class="logo">
+                <img src="{% static 'media/logo.jpg' %}" alt="Admin Logo">
+            </div>
+
+            <h2>📝 สมัครเป็นแอดมิน</h2>
+
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <p class="{{ message.tags }}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                </div>
+                <div class="form-group">
+                    {{ form.email.label_tag }}
+                    {{ form.email }}
+                </div>
+                <div class="form-group password-group">
+                    {{ form.password1.label_tag }}
+                    <input type="password" name="password1" id="password1">
+                    <span class="toggle-password" onclick="togglePassword('password1')">
+                        👁
+                    </span>
+                </div>
+                <div class="form-group password-group">
+                    {{ form.password2.label_tag }}
+                    <input type="password" name="password2" id="password2">
+                    <span class="toggle-password" onclick="togglePassword('password2')">
+                        👁
+                    </span>
+                </div>
+
+                <button type="submit" class="btn-register">สมัครสมาชิก</button>
+            </form>
+
+            <p class="login-link">
+                มีบัญชีแล้ว? <a href="{% url 'admin_login' %}">เข้าสู่ระบบ</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript เปิด/ปิดรหัสผ่าน -->
+    <script>
+        function togglePassword(id) {
+            let passwordField = document.getElementById(id);
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+            } else {
+                passwordField.type = "password";
+            }
+        }
+    </script>
+</body>
+</html>

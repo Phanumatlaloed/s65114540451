@@ -1,0 +1,103 @@
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'styles/edit_group.css' %}">
+<div class="wrapper">
+    <!-- Main Content -->
+    <main class="content">
+        <header>
+            <h2 class="page-title"><i class="fas fa-edit"></i> แก้ไขข้อมูลชุมชน: {{ group.name }}</h2>
+        </header>
+
+        <div class="edit-group-container">
+            <div class="edit-group-card">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="id_name">ชื่อชุมชน</label>
+                        {{ form.name }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_description">คำอธิบาย</label>
+                        {{ form.description }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_rules">กฎของชุมชน</label>
+                        {{ form.rules }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_image">รูปภาพชุมชน</label>
+                        
+                        <div class="image-upload-area">
+                            <!-- Current Image Display -->
+                            <div class="current-image-preview">
+                                {% if group.image %}
+                                    <img src="{{ group.image.url }}" alt="{{ group.name }}">
+                                {% else %}
+                                    <div class="no-image-placeholder">
+                                        <i class="fas fa-users"></i>
+                                        <span>ไม่มีรูปภาพ</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="file-upload-section">
+                                <!-- Show current image name -->
+                                <!-- {% if group.image %}
+                                    <div class="current-file">
+                                        <span>ปัจจุบัน: </span>
+                                        <span class="file-name">{{ group.image.name|slice:"7:" }}</span>
+                                        <label for="clear_id_image" class="clear-checkbox">
+                                            <input type="checkbox" name="image-clear" id="clear_id_image"> ลบรูปภาพ
+                                        </label>
+                                    </div>
+                                {% endif %} -->
+                                
+                                <!-- File upload field -->
+                                <div class="file-upload-field">
+                                    <label for="id_image" class="custom-file-upload">
+                                        <i class="fas fa-upload"></i> เลือกรูปภาพ
+                                    </label>
+                                    {{ form.image }}
+                                    <span id="file-name-display">ยังไม่ได้เลือกไฟล์</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn save-btn">
+                            <i class="fas fa-save"></i> บันทึกการเปลี่ยนแปลง
+                        </button>
+                        <a href="{% url 'group_detail' group.id %}" class="btn cancel-btn">
+                            <i class="fas fa-times"></i> ยกเลิก
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+// JavaScript to update the file name display when a new file is selected
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('id_image');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    
+    if (fileInput && fileNameDisplay) {
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = fileInput.files[0].name;
+            } else {
+                fileNameDisplay.textContent = 'ยังไม่ได้เลือกไฟล์';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'styles/edit_product.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/sidebar.css' %}">
+    
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <a href="{% url 'my_products' %}" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1><i class="fas fa-edit"></i> แก้ไขสินค้า</h1>
+                <div class="breadcrumb">
+                    <a href="{% url 'seller_dashboard' %}">หน้าหลัก</a> / 
+                    <a href="{% url 'my_products' %}">สินค้าของฉัน</a> / 
+                    <span>แก้ไขสินค้า</span>
+                </div>
+            </div>
+
+            <!-- Edit Product Form -->
+            <div class="edit-product-container">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" class="edit-product-form">
+                            {% csrf_token %}
+                            
+                            <div class="form-row">
+                                <div class="form-group full-width">
+                                    <label for="{{ form.name.id_for_label }}">
+                                        <i class="fas fa-tag"></i> ชื่อสินค้า
+                                    </label>
+                                    {{ form.name }}
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group full-width">
+                                    <label for="{{ form.description.id_for_label }}">
+                                        <i class="fas fa-align-left"></i> รายละเอียดสินค้า
+                                    </label>
+                                    {{ form.description }}
+                                </div>
+                            </div>
+
+                            <div class="form-row two-columns">
+                                <div class="form-group">
+                                    <label for="{{ form.price.id_for_label }}">
+                                        <i class="fas fa-money-bill"></i> ราคา
+                                    </label>
+                                    {{ form.price }}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="{{ form.stock.id_for_label }}">
+                                        <i class="fas fa-cubes"></i> จำนวนสินค้า
+                                    </label>
+                                    {{ form.stock }}
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group full-width">
+                                    <label for="{{ form.category.id_for_label }}">
+                                        <i class="fas fa-folder"></i> หมวดหมู่
+                                    </label>
+                                    {{ form.category }}
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group full-width">
+                                    <label for="{{ form.image.id_for_label }}">
+                                        <i class="fas fa-image"></i> รูปภาพสินค้า
+                                    </label>
+                                    <div class="image-upload-container">
+                                        <div class="upload-btn-wrapper">
+                                            <button class="btn-upload"><i class="fas fa-cloud-upload-alt"></i> อัพโหลดรูปภาพ</button>
+                                            {{ form.image }}
+                                        </div>
+                                        {% if form.instance.image %}
+                                        <div class="preview-container">
+                                            <img src="{{ form.instance.image.url }}" class="preview-image" alt="รูปภาพสินค้าปัจจุบัน">
+                                            <div class="image-overlay">รูปภาพปัจจุบัน</div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> บันทึกการเปลี่ยนแปลง
+                                </button>
+                                <a href="{% url 'my_products' %}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> ยกเลิก
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show filename when file is selected
+        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'No file selected';
+            const uploadBtn = document.querySelector('.btn-upload');
+            if (fileName !== 'No file selected') {
+                uploadBtn.innerHTML = `<i class="fas fa-check"></i> ${fileName}`;
+                uploadBtn.classList.add('file-selected');
+            }
+        });
+    </script>
+</body>
+</html>

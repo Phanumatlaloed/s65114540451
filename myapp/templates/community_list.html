@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Groups</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'styles/community.css' %}">
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="{% static 'media/logo.jpg' %}" alt="Logo">
+            </div>
+            <nav>
+                <ul class="nav">
+                    <li><a href="{% url 'home' %}" class="nav-link"><i class="fas fa-home"></i> <span>หน้าหลัก</span></a></li>
+                    <li><a href="{% url 'community_list' %}" class="nav-link active"><i class="fas fa-users"></i> <span>ชุมชน</span></a></li>
+                    <li><a href="{% url 'savelist' %}" class="nav-link"><i class="fas fa-bookmark"></i> <span>รายการบันทึก</span></a></li>
+                    <li><a href="{% url 'profile' request.user.id %}" class="nav-link"><i class="fas fa-user"></i> <span>โปรไฟล์</span></a></li>
+                    <li><a href="{% url 'product_list' %}" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>รายการสินค้า</span></a></li>
+                    <li><a href="{% url 'notifications' %}" class="nav-link"><i class="fas fa-bell"></i> <span>การแจ้งเตือน</span></a></li>
+                </ul>
+            </nav>
+            <div class="welcome-logout">
+                <p>ยินดีต้อนรับ, <b>{{ request.user.username }}</b></p>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">ออกจากระบบ</button>
+                </form>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="community-container">
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-users"></i> ชุมชนทั้งหมด</h1>
+                <a href="{% url 'create_group' %}" class="create-group-btn">
+                    <i class="fas fa-plus-circle"></i> สร้างชุมชนใหม่
+                </a>
+            </div>
+            
+            <!-- Group List -->
+            <div class="group-list">
+                {% for group in groups %}
+                <div class="group-card">
+                    <img src="{{ group.image.url }}" alt="{{ group.name }}" class="group-image">
+                    <div class="group-info">
+                        <h2>{{ group.name }}</h2>
+                        <p>{{ group.description|truncatewords:20 }}</p>
+                        <div class="group-meta">
+                            <span><i class="fas fa-users"></i> {{ group.members.count }} สมาชิก</span>
+                            <span><i class="fas fa-comments"></i> {{ group.posts.count }} โพสต์</span>
+                        </div>
+                        <a href="{% url 'group_detail' group.id %}" class="view-group-btn">
+                            <i class="fas fa-eye"></i> ดูรายละเอียด
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-groups">
+                    <i class="fas fa-users-slash"></i>
+                    <p>ยังไม่มีชุมชนในขณะนี้</p>
+                    <a href="{% url 'create_group' %}" class="create-group-btn">
+                        <i class="fas fa-plus-circle"></i> สร้างชุมชนใหม่
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

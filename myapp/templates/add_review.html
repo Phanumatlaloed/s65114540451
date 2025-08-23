@@ -1,0 +1,93 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✍️ รีวิวสินค้า - {{ product.name }}</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'styles/add_review.css' %}">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="{% url 'home' %}"><img src="{% static 'media/logo.jpg' %}" alt="Shop Logo"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}" class="nav-link">🏠 หน้าหลัก</a></li>
+                <li><a href="{% url 'profile' request.user.id %}" class="nav-link">👤 โปรไฟล์</a></li>
+                <li><a href="{% url 'product_list' %}" class="nav-link {% if request.path == '/products/' %}active{% endif %}">🛍️ สินค้า</a></li>
+                <li><a href="{% url 'order_history' %}" class="nav-link {% if request.path == '/order/history/' %}active{% endif %}">📜 ประวัติการสั่งซื้อ</a></li>
+                <li><a href="{% url 'cart' %}" class="nav-link {% if request.path == '/cart/' %}active{% endif %}">🛒 ตะกร้า</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>✍️ รีวิวสินค้า</h1>
+
+        {% if order.id and product.id %}
+        <div class="product-info">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            <h2>{{ product.name }}</h2>
+            <p>💰 ราคา: ฿{{ product.price }}</p>
+            <p>📦 จำนวนในสต็อก: {{ product.stock }}</p>
+        </div>
+
+        <!-- ฟอร์มการรีวิว -->
+        <form method="POST" enctype="multipart/form-data" action="{% url 'add_review' order_id=order.id product_id=product.id %}">
+            {% csrf_token %}
+
+            <!-- คะแนน -->
+            <label>🌟 ให้คะแนน:</label>
+            <select name="rating" required>
+                <option value="1">⭐ 1</option>
+                <option value="2">⭐ 2</option>
+                <option value="3">⭐ 3</option>
+                <option value="4">⭐ 4</option>
+                <option value="5" selected>⭐ 5</option>
+            </select>
+
+            <!-- รีวิวข้อความ -->
+            <label>📝 รีวิวของคุณ:</label>
+            <textarea name="comment" placeholder="พิมพ์รีวิวของคุณที่นี่..." required></textarea>
+
+            <!-- อัปโหลดไฟล์ -->
+            <label>📷 อัปโหลดรูป/วิดีโอ (ไม่บังคับ):</label>
+            <input type="file" name="media" multiple>
+
+            <!-- ปุ่มส่ง -->
+            <div class="form-buttons">
+                <button type="submit" class="btn-submit">📩 ส่งรีวิว</button>
+                <a href="{% url 'order_history' %}" class="btn-cancel">❌ ยกเลิก</a>
+            </div>            
+        </form>
+
+        {% else %}
+            <p class="error-msg">❌ ไม่สามารถรีวิวได้ เนื่องจากไม่มีข้อมูลออเดอร์</p>
+        {% endif %}
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const fileInput = document.querySelector("input[name='media']");
+            fileInput.addEventListener("change", function() {
+                if (fileInput.files.length > 0) {
+                    alert(`📂 คุณเลือกไฟล์ ${fileInput.files.length} ไฟล์`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

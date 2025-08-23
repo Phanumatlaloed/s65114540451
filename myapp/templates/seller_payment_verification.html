@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตรวจสอบการชำระเงิน | Genni Shop</title>
+    <link rel="stylesheet" href="{% static 'styles/payments_sellers.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/sidebar.css' %}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- เพิ่ม Font Awesome สำหรับ Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Mobile Hamburger Menu -->
+    <div class="hamburger-menu" id="hamburger-menu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <h2 class="sidebar-title">
+                <i class="fas fa-store"></i> Genni Shop
+            </h2> 
+            <ul class="menu">
+                <li class="menu-header"><i class="fas fa-shopping-cart"></i> คำสั่งซื้อ</li>
+                <li class="menu-item"><a href="{% url 'seller_dashboard' %}"><i class="fas fa-chart-line"></i> แดชบอร์ด</a></li>
+                <li class="menu-item"><a href="{% url 'seller_orders' %}"><i class="fas fa-box"></i> คำสั่งซื้อของฉัน</a></li>
+                <li class="menu-item active"><a href="{% url 'seller_payment_verification' %}"><i class="fas fa-credit-card"></i> ตรวจสอบการชำระเงิน</a></li>
+                <li class="menu-item"><a href="{% url 'seller_refund_requests' %}"><i class="fas fa-undo"></i> ขอคืนสินค้า</a></li>
+
+                <li class="menu-header"><i class="fas fa-tags"></i> สินค้า</li>
+                <li class="menu-item"><a href="{% url 'my_products' %}"><i class="fas fa-cubes"></i> สินค้าของฉัน</a></li>
+                <li class="menu-item"><a href="{% url 'add_product' %}"><i class="fas fa-plus-circle"></i> เพิ่มสินค้าใหม่</a></li>
+
+                <li class="menu-header"><i class="fas fa-chart-bar"></i> รายงาน</li>
+                <li class="menu-item"><a href="{% url 'seller_performance' %}"><i class="fas fa-award"></i> ประสิทธิภาพร้านค้า</a></li>
+                <li class="menu-item"><a href="{% url 'seller_notifications_lists' %}"><i class="fas fa-bell"></i> การแจ้งเตือน</a></li>
+                <li class="menu-item"><a href="{% url 'seller_reviews' %}"><i class="fas fa-star"></i> ตรวจสอบการรีวิว</a></li>
+            
+                <li class="menu-header"><i class="fas fa-cog"></i> การตั้งค่า</li>
+                <li class="menu-item"><a href="{% url 'edit_store' %}"><i class="fas fa-store-alt"></i> แก้ไขร้านค้า</a></li>
+                <li class="menu-item"><a href="{% url 'edit_seller_profile' %}"><i class="fas fa-user-edit"></i> แก้ไขโปรไฟล์</a></li>
+                <li class="menu-item"><a href="{% url 'seller_wallet' %}"><i class="fas fa-wallet"></i> กระเป๋าเงิน</a></li>
+                <li class="menu-item logout"><a href="{% url 'seller_logout' %}"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a></li>
+            </ul>
+        </aside>
+
+
+        <!-- Main Content -->
+        <main class="content">
+            <h2><i class="fas fa-credit-card"></i> ตรวจสอบการชำระเงิน</h2>
+
+            {% if orders %}
+            <div class="payment-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>หมายเลขออเดอร์</th>
+                            <th>ลูกค้า</th>
+                            <th>ยอดชำระ</th>
+                            <th>สลิปโอนเงิน</th>
+                            <th>สถานะ</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>#{{ order.id }}</td>
+                            <td>{{ order.user.username }}</td>
+                            <td>฿{{ order.total_price }}</td>
+
+                            <!-- ✅ ตรวจสอบว่ามีสลิปหรือไม่ -->
+                            <td>
+                                {% if order.payment and order.payment.slip %}
+                                    <a href="{{ order.payment.slip.url }}" target="_blank" class="slip-btn">ดูสลิป</a>
+                                {% else %}
+                                    ❌ ไม่มีสลิป
+                                {% endif %}
+                            </td>
+
+                            <!-- ✅ แสดงสถานะปัจจุบัน -->
+                            <td class="status">
+                                {% if order.payment_status == "pending" %}
+                                    ⏳ รออนุมัติ
+                                {% elif order.payment_status == "paid" %}
+                                    ✅ อนุมัติแล้ว
+                                {% else %}
+                                    ❌ ถูกปฏิเสธ
+                                {% endif %}
+                            </td>
+
+                            <!-- ✅ ปุ่มอนุมัติ & ปฏิเสธ -->
+                            <td>
+                                {% if order.payment_status == "pending" %}
+                                    <a href="{% url 'approve_seller_payment' order.id %}" class="btn approve">อนุมัติ</a>
+                                    <a href="{% url 'reject_seller_payment' order.id %}" class="btn reject">ปฏิเสธ</a>
+                                {% elif order.payment_status == "paid" %}
+                                    ✅ อนุมัติแล้ว
+                                {% else %}
+                                    ❌ ถูกปฏิเสธ
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <div class="no-orders">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>ไม่มีคำสั่งซื้อที่รออนุมัติ</p>
+                </div>
+            {% endif %}
+            <section class="contact-admin-card">
+                <h3><i class="fas fa-headset"></i> ต้องการความช่วยเหลือ?</h3>
+                <p>หากคุณมีปัญหาในการชำระเงิน หรือคำถามอื่น ๆ สามารถติดต่อทีมงานแอดมินได้เลย</p>
+            
+                <ul class="contact-list">
+                    <li><i class="fas fa-envelope"></i> อีเมล: <a href="mailto:support@myshop.com">support@myshop.com</a></li>
+                    <li><i class="fab fa-line"></i> LINE ID: <strong>@myshopadmin</strong></li>
+                    <li><i class="fas fa-phone-alt"></i> โทร: <a href="tel:0991234567">099-123-4567</a></li>
+                </ul>
+            
+                <a href="mailto:support@myshop.com" class="btn-contact-admin">
+                    <i class="fas fa-paper-plane"></i> ติดต่อแอดมิน
+                </a>
+            </section>
+        </main>
+    </div>
+
+
+    <!-- JavaScript for Interactions -->
+    <script>
+        // Toggle Sidebar for Mobile
+        document.getElementById('hamburger-menu').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

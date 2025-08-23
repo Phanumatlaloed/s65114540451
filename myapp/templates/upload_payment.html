@@ -1,0 +1,58 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📜 อัปโหลดหลักฐานการชำระเงิน</title>
+    <link rel="stylesheet" href="{% static 'styles/payment_upload.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/navbar.css' %}">
+</head>
+<body>
+
+    <!-- 🌸 Navbar -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="{% url 'home' %}">
+                    <img src="{% static 'media/logo.jpg' %}" alt="Shop Logo">
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}" class="nav-link">🏠 หน้าหลัก</a></li>
+                <li><a href="{% url 'profile' request.user.id %}" class="nav-link">👤 โปรไฟล์</a></li>
+                <li><a href="{% url 'product_list' %}" class="nav-link {% if request.path == '/products/' %}active{% endif %}">🛍️ สินค้า</a></li>
+                <li><a href="{% url 'order_history' %}" class="nav-link {% if request.path == '/order/history/' %}active{% endif %}">📜 ประวัติการสั่งซื้อ</a></li>
+                <li><a href="{% url 'cart' %}" class="nav-link {% if request.path == '/cart/' %}active{% endif %}">🛒 ตะกร้า</a></li>
+            </ul>
+        </nav>
+    </header> 
+
+    <div class="payment-container">
+        <h2>💳 อัปโหลดหลักฐานการชำระเงิน</h2>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <h3>📌 หมายเลขออเดอร์:</h3>
+            <ul>
+                {% for order in orders %}
+                    <li>#{{ order.id }} (฿{{ order.total_price }}) - {{ order.seller.store_name }}</li>
+                {% endfor %}
+            </ul>
+
+            <h3>💰 ยอดรวมที่ต้องชำระ: ฿{{ total_payment }}</h3>
+
+            <h3>🏦 รายละเอียดบัญชีธนาคาร:</h3>
+            <p><strong>เลขที่บัญชี:</strong> 123-456-7890</p>
+            <p><strong>ชื่อบัญชี:</strong> Genniguru</p>
+
+            <label>📷 อัปโหลดสลิปการชำระเงิน:</label>
+            <input type="file" name="slip" required>
+
+            <button type="submit" class="btn btn-success">📤 ส่งหลักฐานการชำระเงิน</button>
+        </form>
+    </div>
+</body>
+</html>

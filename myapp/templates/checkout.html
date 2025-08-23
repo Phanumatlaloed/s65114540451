@@ -1,0 +1,75 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📜 สรุปรายการสินค้าที่ต้องชำระ</title>
+    <link rel="stylesheet" href="{% static 'styles/checkout.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/navbar.css' %}">
+</head>
+<body>
+
+    <!-- 🌸 Navbar -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="{% url 'home' %}">
+                    <img src="{% static 'media/logo.jpg' %}" alt="Shop Logo">
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}" class="nav-link">🏠 หน้าหลัก</a></li>
+                <li><a href="{% url 'profile' request.user.id %}" class="nav-link">👤 โปรไฟล์</a></li>
+                <li><a href="{% url 'product_list' %}" class="nav-link {% if request.path == '/products/' %}active{% endif %}">🛍️ สินค้า</a></li>
+                <li><a href="{% url 'order_history' %}" class="nav-link {% if request.path == '/order/history/' %}active{% endif %}">📜 ประวัติการสั่งซื้อ</a></li>
+                <li><a href="{% url 'cart' %}" class="nav-link {% if request.path == '/cart/' %}active{% endif %}">🛒 ตะกร้า</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- 🌸 Checkout Summary -->
+    <div class="checkout-container">
+        <h2>🛒 สรุปรายการสินค้าที่ต้องชำระ</h2>
+
+        <form method="POST" action="{% url 'confirm_order' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <fieldset class="address-selection">
+                <legend>📍 เลือกที่อยู่จัดส่ง</legend>
+
+                <label for="shipping_address">ที่อยู่:</label>
+                <select name="shipping_address" id="shipping_address" required>
+                    {% for address in saved_addresses %}
+                        <option value="{{ address.id }}">
+                            📍 {{ address.address }}, {{ address.city }} {{ address.postal_code }} (📞 {{ address.phone_number }})
+                        </option>
+                    {% empty %}
+                        <option disabled>⚠️ ไม่มีที่อยู่ กรุณาเพิ่มใหม่</option>
+                    {% endfor %}
+                </select>
+
+                <div class="address-actions">
+                    <a href="{% url 'manage_addresses' %}" class="btn btn-secondary">📌 จัดการที่อยู่</a>
+                    <a href="{% url 'add_address' %}" class="btn btn-primary">➕ เพิ่มที่อยู่ใหม่</a>
+                </div>
+            </fieldset>
+
+            <h3>🛍 รายการสินค้าทั้งหมด</h3>
+            {% for seller, items in orders_by_seller.items %}
+                <h4>🏪 ร้านค้า: <strong>{{ seller.store_name }}</strong></h4>
+                <ul>
+                    {% for item in items %}
+                        <li>{{ item.product.name }} - {{ item.quantity }} ชิ้น (฿{{ item.product.price }})</li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+
+            <h3>💰 ยอดรวมทั้งหมด: <strong style="color: red;">฿{{ total_checkout_price }}</strong></h3>
+
+            <button type="submit" class="btn btn-success">✅ ยืนยันคำสั่งซื้อ</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> เพิ่มที่อยู่ใหม่</title>
+    <link rel="stylesheet" href="{% static 'styles/add_address.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/navbar.css' %}">
+</head>
+<body>
+    <!-- 🌸 Navbar -->
+    <header class="navbar">
+        <div class="logo">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'media/logo.jpg' %}" alt="Shop Logo">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="{% url 'home' %}" class="nav-link">🏠 หน้าหลัก</a></li>
+            <li><a href="{% url 'profile' request.user.id %}" class="nav-link">👤 โปรไฟล์</a></li>
+            <li><a href="{% url 'product_list' %}" class="nav-link {% if request.path == '/products/' %}active{% endif %}">🛍️ สินค้า</a></li>
+            <li><a href="{% url 'order_history' %}" class="nav-link {% if request.path == '/order/history/' %}active{% endif %}">📜 ประวัติการสั่งซื้อ</a></li>
+            <li><a href="{% url 'cart' %}" class="nav-link {% if request.path == '/cart/' %}active{% endif %}">🛒 ตะกร้า</a></li>
+        </ul>
+    </header>
+
+    <div class="address-container">
+        <h2>เพิ่มที่อยู่ใหม่</h2>
+        
+        <div class="instruction-box">
+            <p class="instruction-text">⚠️ โปรดกรอกชื่อและนามสกุลของผู้รับในที่อยู่ให้ครบถ้วน เพื่อความสะดวกในการจัดส่งสินค้า</p>
+        </div>
+        
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">บันทึกที่อยู่</button>
+        </form>
+        <a href="{% url 'manage_addresses' %}" class="btn btn-secondary">จัดการที่อยู่</a>
+        <a href="{% url 'checkout' %}" class="btn btn-secondary">กลับ</a>
+    </div>
+</body>
+</html>

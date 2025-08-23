@@ -1,0 +1,258 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>รายละเอียดโพสต์</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Fonts - Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'styles/post_detail.css' %}">
+
+    <!-- JavaScript -->
+    <script src="{% static 'js/post.js' %}" defer></script>
+    <script src="{% static 'js/like.js' %}" defer></script>
+    <script src="{% static 'js/share.js' %}" defer></script>
+    <script src="{% static 'js/delete.js' %}" defer></script>
+    <script src="{% static 'js/comment.js' %}" defer></script>
+    <script src="{% static 'js/savelist.js' %}" defer></script>
+    <script src="{% static 'js/follow.js' %}" defer></script>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="{% static 'media/logo.jpg' %}" alt="Logo" class="logo-img">
+            </div>
+            <nav>
+                <ul class="nav">
+                    <li><a href="{% url 'home' %}" class="nav-link"><i class="fas fa-home"></i> <span>หน้าหลัก</span></a></li>
+                    <li><a href="{% url 'community_list' %}" class="nav-link"><i class="fas fa-users"></i> <span>ชุมชน</span></a></li>
+                    <li><a href="{% url 'savelist' %}" class="nav-link"><i class="fas fa-bookmark"></i> <span>รายการบันทึก</span></a></li>
+                    <li><a href="{% url 'profile' request.user.id %}" class="nav-link"><i class="fas fa-user"></i> <span>โปรไฟล์</span></a></li>
+                    <li><a href="{% url 'product_list' %}" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>รายการสินค้า</span></a></li>
+                    <li><a href="{% url 'notifications' %}" class="nav-link"><i class="fas fa-bell"></i> <span>การแจ้งเตือน</span></a></li>
+                </ul>
+            </nav>
+            <div class="welcome-logout">
+                <p>ยินดีต้อนรับ, <b>{{ request.user.username }}</b></p>
+                <form action="{% url 'logout' %}" method="post" class="mt-2">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">ออกจากระบบ</button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <div class="back-link">
+                <a href="{% url 'savelist' %}" class="btn">
+                    <i class="fas fa-arrow-left"></i> ย้อนกลับ
+                </a>
+            </div>
+
+            <div class="post" id="post-{{ post.id }}">
+                <div class="user-info">
+                    <img src="{{ post.user.member_profile.profile_picture.url|default:'/static/images/default-profile.png' }}" 
+                         alt="{{ post.user.username }}" class="profile-img">
+                    <div class="user-details">
+                        <b>{{ post.user.username }}</b>
+                        <small>{{ post.created_at|date:"F j, Y, g:i a" }}</small>
+                    </div>
+                    {% if post.user.id != request.user.id %}
+                        <form method="POST" action="{% url 'follow_user' post.user.id %}" class="follow-form">
+                            {% csrf_token %}
+                            <button type="submit" class="follow-btn btn {% if post.user.id in following_users %}btn-primary{% else %}btn-outline{% endif %}"
+                                    data-user-id="{{ post.user.id }}">
+                                    {% if post.user.id in following_users %}
+                                        <i class="fas fa-user-minus"></i> ติดตามแล้ว
+                                    {% else %}
+                                        <i class="fas fa-user-plus"></i> ติดตาม
+                                    {% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+
+                <div class="post-content">
+                    {{ post.content }}
+                </div>
+
+                {% if post.media.all %}
+                    <div class="post-media">
+                        {% with media_count=post.media.all|length %}
+                            {% if media_count == 1 %}
+                                <div class="media-grid media-single">
+                            {% elif media_count == 2 %}
+                                <div class="media-grid media-dual">
+                            {% elif media_count == 3 %}
+                                <div class="media-grid media-triple">
+                            {% elif media_count >= 4 %}
+                                <div class="media-grid media-quad">
+                            {% endif %}
+                                {% for media in post.media.all|slice:":4" %}
+                                    <div class="media-item" data-media-id="{{ media.id }}">
+                                        {% if media.media_type == "image" %}
+                                            <img src="{{ media.file.url }}" alt="Post image">
+                                        {% elif media.media_type == "video" %}
+                                            <video src="{{ media.file.url }}" controls></video>
+                                        {% endif %}
+                                        {% if forloop.counter == 4 and media_count > 4 %}
+                                            <div class="media-more">+{{ media_count|add:"-4" }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endwith %}
+                    </div>
+                {% endif %}
+
+                <div class="actions">
+                    <button class="like-btn {% if request.user in post.likes.all %}liked{% endif %}" data-post-id="{{ post.id }}" id="like-btn-{{ post.id }}">
+                        {% if request.user in post.likes.all %}
+                            <i class="fas fa-heart"></i> เลิกถูกใจ
+                        {% else %}
+                            <i class="far fa-heart"></i> ถูกใจ
+                        {% endif %}
+                        <span class="like-count" id="like-count-{{ post.id }}">{{ post.likes.count }}</span>
+                    </button>
+
+                    <button class="btn" data-post-id="{{ post.id }}">
+                        <i class="fas fa-comments"></i> ความคิดเห็น
+                    </button>
+
+                    <button class="btn share-btn" data-post-id="{{ post.id }}">
+                        <i class="fas fa-share-alt"></i> แชร์
+                    </button>
+
+                    <button class="btn save-btn {% if post in request.user.saved_posts.all %}btn-primary{% endif %}" data-post-id="{{ post.id }}">
+                        {% if post in request.user.saved_posts.all %}
+                            <i class="fas fa-bookmark"></i> ยกเลิกบันทึก
+                        {% else %}
+                            <i class="far fa-bookmark"></i> บันทึก
+                        {% endif %}
+                    </button>
+
+                    {% if request.user == post.user %}
+                        <a href="{% url 'edit_post' post.id %}" class="btn">
+                            <i class="fas fa-edit"></i> แก้ไข
+                        </a>
+                        <button class="btn btn-danger delete-btn" data-post-id="{{ post.id }}">
+                            <i class="fas fa-trash"></i> ลบ
+                        </button>
+                    {% else %}
+                        <a href="{% url 'report_post' post.id %}" class="btn btn-warning">
+                            <i class="fas fa-flag"></i> รายงาน
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="comments">
+                    <div class="comments-header">
+                        <i class="fas fa-comments"></i> ความคิดเห็น
+                        <span class="comments-count">{{ post.comments.count }}</span>
+                    </div>
+                    <div class="comments-list" id="comments-{{ post.id }}">
+                        {% for comment in post.comments.all %}
+                            <div class="comment-item" id="comment-{{ comment.id }}">
+                                <div class="comment-avatar">
+                                    <img src="{{ comment.user.member_profile.profile_picture.url|default:'/static/images/default-profile.png' }}" alt="{{ comment.user.username }}">
+                                </div>
+                                <div class="comment-content">
+                                    <div class="comment-bubble {% if comment.user == request.user %}own-comment{% endif %}">
+                                        <div class="comment-author">{{ comment.user.username }}</div>
+                                        <div class="comment-text">{{ comment.content }}</div>
+                                    </div>
+                                    <div class="comment-meta">
+                                        <span class="comment-time">{{ comment.created_at|timesince }} ที่แล้ว</span>
+                                        {% if request.user == comment.user %}
+                                            <div class="comment-actions">
+                                                <button class="action-btn edit-comment" data-comment-id="{{ comment.id }}">
+                                                    <i class="fas fa-edit"></i> แก้ไข
+                                                </button>
+                                                <button class="action-btn delete-comment" data-comment-id="{{ comment.id }}">
+                                                    <i class="fas fa-trash"></i> ลบ
+                                                </button>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="no-comments">
+                                <i class="fas fa-comments"></i>
+                                <p>ยังไม่มีความคิดเห็น เป็นคนแรกที่แสดงความคิดเห็นสิ</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <form class="comment-form" data-post-id="{{ post.id }}">
+                        {% csrf_token %}
+                        <div class="comment-form-avatar">
+                            <img src="{{ request.user.member_profile.profile_picture.url|default:'/static/images/default-profile.png' }}" alt="{{ request.user.username }}">
+                        </div>
+                        <div class="comment-input-wrapper">
+                            <input type="text" name="content" class="comment-input" placeholder="เขียนความคิดเห็น..." autocomplete="off">
+                            <button type="submit" class="comment-submit" disabled>
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <!-- Recommendations Panel -->
+        <aside class="recommendations">
+            <h5><i class="fas fa-tags"></i> แนะนำสินค้า</h5>
+            <div class="product-grid">
+                {% if products %}
+                    {% for product in products %}
+                        <div class="product-card">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-img">
+                            <p>{{ product.name }}</p>
+                            <div class="product-price">
+                                <i class="fas fa-coins"></i> ฿{{ product.price }}
+                            </div>
+                            <a href="{% url 'product_detail' product.id %}" class="btn btn-outline">
+                                <i class="fas fa-shopping-bag"></i> ดูรายละเอียด
+                            </a>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-box-open"></i>
+                        <p class="text-muted">ไม่มีสินค้าแนะนำในขณะนี้</p>
+                    </div>
+                {% endif %}
+            </div>
+        </aside>
+    </div>
+
+    <!-- Modal for Media Gallery -->
+    <div class="modal fade" id="mediaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-images"></i> รูปภาพ/วิดีโอ</h5>
+                    <button type="button" class="close-btn" data-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="media-container">
+                        <!-- Dynamic content will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

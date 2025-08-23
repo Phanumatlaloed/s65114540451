@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛍 สินค้าทั้งหมด</title>
+
+    <!-- ✅ CSS -->
+    <link rel="stylesheet" href="{% static 'styles/product_list.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/navbar.css' %}">
+
+    <!-- ✅ Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 🌸 Navbar -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="{% url 'home' %}">
+                    <img src="{% static 'media/logo.jpg' %}" alt="Shop Logo">
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}" class="nav-link">🏠 หน้าหลัก</a></li>
+                <li><a href="{% url 'profile' request.user.id %}" class="nav-link">👤 โปรไฟล์</a></li>
+                <li><a href="{% url 'product_list' %}" class="nav-link {% if request.path == '/products/' %}active{% endif %}">🛍️ สินค้า</a></li>
+                <li><a href="{% url 'order_history' %}" class="nav-link {% if request.path == '/order/history/' %}active{% endif %}">📜 ประวัติการสั่งซื้อ</a></li>
+                <li><a href="{% url 'cart' %}" class="nav-link {% if request.path == '/cart/' %}active{% endif %}">🛒 ตะกร้า</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <h2>🛍 สินค้าทั้งหมด</h2>
+
+        <!-- 🔍 ค้นหาสินค้า -->
+        <input type="text" id="searchBox" placeholder="🔍 ค้นหาสินค้า..." onkeyup="filterProducts()">
+
+        <!-- 📌 เลือกหมวดหมู่ -->
+        <div class="filter-section">
+            <label for="categoryFilter">📌 เลือกหมวดหมู่:</label>
+            <select id="categoryFilter" class="form-select" onchange="filterProducts()">
+                <option value="">ทั้งหมด</option>
+                <option value="makeup">Makeup</option>
+                <option value="skincare">Skincare</option>
+                <option value="haircare">Hair Care</option>
+                <option value="bodycare">Body Care</option>
+                <option value="nailcare">Nail Care</option>
+                <option value="wellness">Wellness</option>
+                <option value="beautytools">Beauty Tools</option>
+            </select>
+        </div>
+
+        <div class="row" id="productList">
+            {% for product in products %}
+            <div class="col-md-4 product-item" data-category="{{ product.category }}" data-name="{{ product.name }}">
+                <div class="card">
+                    <img src="{{ product.image.url }}" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">🛍 ร้านค้า: <a href="{% url 'store_detail' product.seller.id %}">{{ product.seller.store_name }}</a></p>
+                        <p class="card-text">📌 หมวดหมู่: {{ product.get_category_display }}</p>
+                        <p class="card-text">📦 คงเหลือ: 
+                            {% if product.stock > 0 %}
+                                {{ product.stock }}
+                            {% else %}
+                                <span class="out-of-stock">❌ สินค้าหมด</span>
+                            {% endif %}
+                        </p>
+                        <p class="card-text">🔥 ขายแล้ว: <strong>{{ product.total_sold }}</strong> ชิ้น</p>
+                        <p class="text-primary">💰 ราคา: ฿{{ product.price }}</p>
+
+                        <!-- 🛒 ปุ่มเพิ่มในตะกร้า (ถ้าสินค้าเหลือ) -->
+                        <div class="btn-container">
+                            <!-- เพิ่มในตะกร้า ปุ่มสำหรับสินค้าที่มีสต็อก -->
+                            {% if product.stock > 0 %}
+                                <button type="button" class="btn btn-success add-to-cart-btn" data-product-id="{{ product.id }}">
+                                    ➕ เพิ่มในตะกร้า
+                                </button>
+                            {% else %}
+                                <button type="button" class="btn btn-secondary" disabled>
+                                    ❌ สินค้าหมด
+                                </button>
+                            {% endif %}
+                        
+                            <!-- รายละเอียด ปุ่ม -->
+                            <a href="{% url 'product_detail' product.id %}" class="btn btn-info">
+                                📄 รายละเอียด
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p id="noProducts" class="text-center text-muted">⚠️ ไม่มีสินค้าที่ตรงกับการค้นหา</p>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- ✅ JavaScript -->
+    <script>
+        function filterProducts() {
+            let searchInput = document.getElementById("searchBox").value.toLowerCase();
+            let categoryFilter = document.getElementById("categoryFilter").value;
+            let productItems = document.querySelectorAll(".product-item");
+            let noProductsMessage = document.getElementById("noProducts");
+            let hasVisibleProduct = false;
+
+            productItems.forEach(item => {
+                let productName = item.getAttribute("data-name").toLowerCase();
+                let productCategory = item.getAttribute("data-category");
+
+                let matchesSearch = productName.includes(searchInput);
+                let matchesCategory = categoryFilter === "" || productCategory === categoryFilter;
+
+                if (matchesSearch && matchesCategory) {
+                    item.style.display = "block";
+                    hasVisibleProduct = true;
+                } else {
+                    item.style.display = "none";
+                }
+            });
+
+            noProductsMessage.style.display = hasVisibleProduct ? "none" : "block";
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let addToCartButtons = document.querySelectorAll(".add-to-cart-btn");
+
+            addToCartButtons.forEach(button => {
+                button.addEventListener("click", function () {
+                    let productId = this.getAttribute("data-product-id");
+
+                    fetch(`/cart/add/${productId}/`, {  // ✅ ตรวจสอบ URL ให้ตรงกับ backend
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ "product_id": productId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("✅ เพิ่มสินค้าในตะกร้าเรียบร้อย!");
+                            document.getElementById("cart-count").textContent = data.cart_count;
+                        } else {
+                            alert("❌ ไม่สามารถเพิ่มสินค้าได้: " + data.message);
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                });
+            });
+        });
+    </script>
+</body>
+</html>
