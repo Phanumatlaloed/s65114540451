@@ -1,22 +1,34 @@
-# project/settings.py
 from pathlib import Path
 from dotenv import load_dotenv
 import os
 
+# ===== Load .env =====
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ===== Core =====
 SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_ME")
-DEBUG = os.getenv("DEBUG", "False").lower() in ("1", "true", "yes")
+DEBUG = os.getenv("DEBUG", "True").lower() in ("1", "true", "yes")
 
-def csv_list(name, default=""):
+def csv_list(name: str, default: str = ""):
     raw = os.getenv(name, default)
     return [x.strip() for x in raw.split(",") if x.strip()]
 
-ALLOWED_HOSTS = csv_list("ALLOWED_HOSTS", "202.28.49.122")
-CSRF_TRUSTED_ORIGINS = csv_list("CSRF_TRUSTED_ORIGINS", "http://202.28.49.122:8080")
+# พอร์ตหน้าเว็บภายนอกตาม assignment (เริ่มต้น 10451)
+EXTERNAL_WEB_PORT = os.getenv("EXTERNAL_WEB_PORT", "10451")
 
+# Hosts / CSRF
+ALLOWED_HOSTS = csv_list("ALLOWED_HOSTS", "localhost,127.0.0.1")
+
+_env_csrf = csv_list("CSRF_TRUSTED_ORIGINS", "")
+if _env_csrf:
+    CSRF_TRUSTED_ORIGINS = _env_csrf
+else:
+    # สร้างจาก ALLOWED_HOSTS + EXTERNAL_WEB_PORT อัตโนมัติ
+    CSRF_TRUSTED_ORIGINS = [f"http://{h}:{EXTERNAL_WEB_PORT}" for h in ALLOWED_HOSTS]
+
+# ===== Apps =====
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -25,9 +37,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
+
+    # optional
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+
     "myapp",
     "notifications",
 ]
@@ -39,8 +54,10 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
 )
 
+# ===== Middleware =====
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -48,8 +65,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
-    "django.middleware.security.SecurityMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"
@@ -72,7 +87,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "project.wsgi.application"
 
-# PostgreSQL ONLY
+# ===== Database (PostgreSQL) =====
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -85,23 +100,31 @@ DATABASES = {
     }
 }
 
+# ===== I18N / TZ =====
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = os.getenv("TIME_ZONE", "Asia/Bangkok")
 USE_I18N = True
-USE_TZ = os.getenv("USE_TZ", "True").lower() in ("1", "true", "yes")
+USE_TZ = os.getenv("USE_TZ", "False").lower() in ("1", "true", "yes")
 
+# ===== Static / Media =====
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "myapp" / "static"] if (BASE_DIR / "myapp" / "static").exists() else []
+_static_dir = BASE_DIR / "myapp" / "static"
+STATICFILES_DIRS = [_static_dir] if _static_dir.exists() else []
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# ===== Sessions =====
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_NAME = "sessionid"
 
-AUTH_USER_MODEL = "myapp.CustomUser"
+# ===== Custom User (ถ้ามีโมเดลจริง) =====
+AUTH_USER_MODEL = os.getenv("AUTH_USER_MODEL", "myapp.CustomUser")
 
+# ===== Upload limits =====
 FILE_UPLOAD_HANDLERS = [
     "django.core.files.uploadhandler.MemoryFileUploadHandler",
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
@@ -109,6 +132,7 @@ FILE_UPLOAD_HANDLERS = [
 FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600
 DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600
 
+# ===== Email =====
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
@@ -118,30 +142,3 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "webmaster@localhost")
 SERVER_EMAIL = os.getenv("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
-
-from decouple import config
-
-ALLOWED_HOSTS = [
-    h.strip()
-    for h in config("ALLOWED_HOSTS", default="").split(",")
-    if h.strip()
-]
-
-# ใส่ทั้ง http และ https พร้อมพอร์ต (เช่น 8080)
-def _with_port(host, port="8080"):
-    return f"http://{host}:{port}", f"https://{host}:{port}"
-
-_csrf = []
-for h in ALLOWED_HOSTS:
-    if h in ("", "localhost", "127.0.0.1"):
-        # สำหรับ dev/localhost (ถ้าจะใช้) ไม่ใส่พอร์ตก็ได้ถ้าใช้ 80/443
-        _csrf.extend([f"http://{h}:8080", f"https://{h}:8080"])
-    else:
-        http, https = _with_port(h, "8080")
-        _csrf.extend([http, https])
-
-CSRF_TRUSTED_ORIGINS = _csrf
-
-DEBUG = False
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

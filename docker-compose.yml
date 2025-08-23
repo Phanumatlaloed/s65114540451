@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "20451:5432"  # host 20451 -> container 5432 (ใช้พอร์ตตนเอง 2XXXX)
+      - "20451:5432"  # host 20451 -> container 5432 (พอร์ตตนเอง 2XXXX)
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
