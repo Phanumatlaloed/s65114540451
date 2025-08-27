@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "10451:10451"  # host 20451 -> container 5432 (พอร์ตตนเอง 2XXXX)
+      - "20451:5432"  # host 20451 -> container 5432 (พอร์ตตนเอง 2XXXX)
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -27,7 +27,7 @@ services:
       TZ: Asia/Bangkok
       PYTHONUNBUFFERED: "1"
     ports:
-      - "10451:10451"  # เข้าเว็บที่ http://localhost:10451 (พอร์ตตนเอง 1XXXX)
+      - "10451:8080"  # เข้าเว็บที่ http://localhost:10451 (พอร์ตตนเอง 1XXXX)
     volumes:
       - ./media:/app/media
       - ./staticfiles:/app/staticfiles
@@ -44,14 +44,14 @@ services:
         python manage.py migrate --noinput || exit 1;
         python manage.py collectstatic --noinput || true;
         exec gunicorn project.wsgi:application \
-          --bind 0.0.0.0:10451 \
+          --bind 0.0.0.0:8080 \
           --workers ${GUNICORN_WORKERS:-3} \
           --timeout ${GUNICORN_TIMEOUT:-60} \
           --max-requests ${GUNICORN_MAX_REQUESTS:-1000} \
           --max-requests-jitter ${GUNICORN_MAX_REQUESTS_JITTER:-50}
       '
     healthcheck:
-      test: ["CMD-SHELL", "nc -z 127.0.0.1 10451 || exit 1"]
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 8080 || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 10
