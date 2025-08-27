@@ -21,6 +21,6 @@ RUN mkdir -p /app/staticfiles /app/media
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
-EXPOSE 8080
+EXPOSE 10451
 
-CMD ["gunicorn", "project.wsgi:application", "--bind", "0.0.0.0:8080", "--workers", "3"]
+CMD ["gunicorn", "project.wsgi:application", "--bind", "0.0.0.0:10451", "--workers", "3"]
