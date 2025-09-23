@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   db:
     image: postgres:16
@@ -7,7 +9,6 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-   
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -25,11 +26,15 @@ services:
     environment:
       TZ: Asia/Bangkok
       PYTHONUNBUFFERED: "1"
-    ports:
-      - "${EXTERNAL_WEB_PORT}:8080"  # เข้าเว็บที่ http://localhost:10451 (พอร์ตตนเอง 1XXXX)
+    # ไม่ publish port ออก host เมื่ออยู่หลัง Traefik;
+    # ถ้าอยากทดสอบเดี่ยวในเครื่องตัวเอง ให้เปิดบรรทัดถัดไปแทน:
+    # ports:
+    #   - "${EXTERNAL_WEB_PORT}:8080"
     volumes:
       - ./media:/app/media
       - ./staticfiles:/app/staticfiles
+      # **ตามคำแนะนำอาจารย์** ไม่แนะนำ map static volume ทับกันในงานจริง
+      # ถ้าจำเป็นเฉพาะหน้า ใช้ได้ตามนี้ที่เครื่องตัวเอง
     depends_on:
       db:
         condition: service_healthy
@@ -54,7 +59,21 @@ services:
       interval: 10s
       timeout: 3s
       retries: 10
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${STUDENT_ID}.entrypoints=web"
+      - "traefik.http.routers.${STUDENT_ID}.rule=PathPrefix(`${SUBPATH}`)"
+      - "traefik.http.routers.${STUDENT_ID}.middlewares=${STUDENT_ID}-strip"
+      - "traefik.http.middlewares.${STUDENT_ID}-strip.stripPrefix.prefixes=${SUBPATH}"
+      - "traefik.http.services.${STUDENT_ID}.loadbalancer.server.port=8080"
+    networks:
+      - default
+      - traefik-public
     restart: unless-stopped
 
 volumes:
   pg_data: {}
+
+networks:
+  traefik-public:
+    external: true
