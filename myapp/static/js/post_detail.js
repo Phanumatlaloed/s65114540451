@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function () {
             let postId = this.dataset.postId;
 
-            fetch(`/save/${postId}/`, {
+            fetch(`/s65114540451/save/${postId}/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function () {
             let postId = this.dataset.postId;
 
-            fetch(`/post/${postId}/share/`, {
+            fetch(`/s65114540451/post/${postId}/s65114540451/share/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),

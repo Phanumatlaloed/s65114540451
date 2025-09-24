@@ -11,9 +11,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_ME")
 DEBUG = os.getenv("DEBUG", "True").lower() in ("1", "true", "yes")
 
+
 def csv_list(name: str, default: str = ""):
     raw = os.getenv(name, default)
     return [x.strip() for x in raw.split(",") if x.strip()]
+
 
 # พอร์ตหน้าเว็บภายนอกตาม assignment (เริ่มต้น 10451)
 EXTERNAL_WEB_PORT = os.getenv("EXTERNAL_WEB_PORT", "10451")
@@ -25,7 +27,6 @@ _env_csrf = csv_list("CSRF_TRUSTED_ORIGINS", "")
 if _env_csrf:
     CSRF_TRUSTED_ORIGINS = _env_csrf
 else:
-    # สร้างจาก ALLOWED_HOSTS + EXTERNAL_WEB_PORT อัตโนมัติ
     CSRF_TRUSTED_ORIGINS = [f"http://{h}:{EXTERNAL_WEB_PORT}" for h in ALLOWED_HOSTS]
 
 # ===== Apps =====
@@ -45,6 +46,8 @@ INSTALLED_APPS = [
 
     "myapp",
     "notifications",
+    "cloudinary",
+    "cloudinary_storage",
 ]
 
 SITE_ID = int(os.getenv("SITE_ID", "1"))
@@ -57,7 +60,7 @@ AUTHENTICATION_BACKENDS = (
 # ===== Middleware =====
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # ✅ ต้องมี
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -87,7 +90,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "project.wsgi.application"
 
-# ===== Database (PostgreSQL) =====
+# ===== Database =====
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -107,21 +110,34 @@ USE_I18N = True
 USE_TZ = os.getenv("USE_TZ", "False").lower() in ("1", "true", "yes")
 
 # ===== Static / Media =====
-STATIC_URL = "/static/"
+# Subpath (เช่น /s65114540451) ถ้าไม่ใช้ก็ปล่อยว่าง
+FORCE_SCRIPT_NAME = os.getenv("SUBPATH", "")
+
+FORCE_SCRIPT_NAME = "/s65114540451"
+
+# Static
+STATIC_URL = (FORCE_SCRIPT_NAME + "/static/").replace("//", "/")
 STATIC_ROOT = BASE_DIR / "staticfiles"
-_static_dir = BASE_DIR / "myapp" / "static"
-STATICFILES_DIRS = [_static_dir] if _static_dir.exists() else []
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# Media & Cloudinary
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+STATICFILES_STORAGE = "cloudinary_storage.storage.StaticHashedCloudinaryStorage"
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# MEDIA_URL ไม่ต้องเป็น /media/ เพราะใช้ Cloudinary
+CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME", "")
+MEDIA_URL = f"https://res.cloudinary.com/{CLOUD_NAME}/" if CLOUD_NAME else "/media/"
+
+STORAGES = {
+    "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+    "staticfiles": {"BACKEND": "cloudinary_storage.storage.StaticHashedCloudinaryStorage"},
+}
 
 # ===== Sessions =====
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_NAME = "sessionid"
 
-# ===== Custom User (ถ้ามีโมเดลจริง) =====
+# ===== Custom User =====
 AUTH_USER_MODEL = os.getenv("AUTH_USER_MODEL", "myapp.CustomUser")
 
 # ===== Upload limits =====

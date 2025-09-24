@@ -1,25 +1,16 @@
 FROM python:3.11-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    DJANGO_SETTINGS_MODULE=project.settings \
-    TZ=Asia/Bangkok
-
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    netcat-openbsd \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
 
-COPY . /app
+COPY . .
 
-RUN mkdir -p /app/staticfiles /app/media
-RUN useradd -m appuser && chown -R appuser:appuser /app
-USER appuser
+# collect static (ถ้ามี static local)
+RUN python manage.py collectstatic --noinput || true
 
-EXPOSE 8080
-
-CMD ["gunicorn", "project.wsgi:application", "--bind", "0.0.0.0:8080", "--workers", "3"]
+EXPOSE 8000
+CMD ["gunicorn", "project.wsgi:application", "--bind", "0.0.0.0:8000"]

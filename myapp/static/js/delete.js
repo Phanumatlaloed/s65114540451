@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function() {
             // ปิดการใช้งานปุ่มลบหลังจากคลิก
             this.disabled = true;
 
-            fetch(`/post/${postId}/delete/`, {
+            fetch(`/s65114540451/post/${postId}/delete/`, {
                 method: "POST",
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",

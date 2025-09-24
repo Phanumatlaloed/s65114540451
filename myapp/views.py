@@ -321,30 +321,54 @@ def profile_edit(request):
 @login_required
 def create_post(request):
     if request.method == "POST":
-        content = request.POST.get('content', '').strip()
-        is_community = request.POST.get('is_community', 'false') == 'true'
-        image_files = request.FILES.getlist('images')
-        video_files = request.FILES.getlist('videos')
+        try:
+            content = request.POST.get("content", "").strip()
+            is_community = request.POST.get("is_community", "false") == "true"
+            image_files = request.FILES.getlist("images")
+            video_files = request.FILES.getlist("videos")
 
-        if not content and not image_files and not video_files:
-            return JsonResponse({'success': False, 'message': 'โพสต์ต้องมีข้อความ หรือไฟล์สื่อ'}, status=400)
+            if not content and not image_files and not video_files:
+                return JsonResponse(
+                    {"success": False, "message": "โพสต์ต้องมีข้อความ หรือไฟล์สื่อ"},
+                    status=400,
+                )
 
-        post = Post.objects.create(user=request.user, content=content, is_community_post=is_community)
+            post = Post.objects.create(
+                user=request.user,
+                content=content,
+                is_community_post=is_community,
+            )
 
-        for img in image_files:
-            PostMedia.objects.create(post=post, file=img, media_type='image')
+            # ✅ บันทึกรูป
+            for img in image_files:
+                media = PostMedia(post=post, media_type="image")
+                media.file.save(img.name, img, save=True)
 
-        for vid in video_files:
-            PostMedia.objects.create(post=post, file=vid, media_type='video')
+            # ✅ บันทึกวิดีโอ
+            for vid in video_files:
+                media = PostMedia(post=post, media_type="video")
+                media.file.save(vid.name, vid, save=True)
 
-        return JsonResponse({
-            'success': True, 
-            'post_id': post.id, 
-            'username': request.user.username,
-            'content': content
-        }, status=201)
+            return JsonResponse(
+                {
+                    "success": True,
+                    "post_id": post.id,
+                    "username": request.user.username,
+                    "content": content,
+                },
+                status=201,
+            )
 
-    return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+        except Exception as e:
+            import traceback
+            return JsonResponse(
+                {"success": False, "error": str(e), "trace": traceback.format_exc()},
+                status=500,
+            )
+
+    return JsonResponse(
+        {"success": False, "message": "Invalid request"}, status=400
+    )
 
 #ลบโพสต์ในหน้าหลัก
 @login_required

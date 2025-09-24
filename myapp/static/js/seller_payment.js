@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     function handleAction(action, orderId) {
-        let url = `/seller/payments/${action}/${orderId}/`;
+        let url = `/s65114540451/seller/payments/${action}/${orderId}/`;
 
         fetch(url, {
             method: "GET",

@@ -1,79 +1,48 @@
 version: "3.9"
 
 services:
+  web:
+    build: .
+    command: gunicorn project.wsgi:application --bind 0.0.0.0:8000
+    expose:
+      - "8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.django.rule=PathPrefix(`/s65114540451`)"
+      - "traefik.http.routers.django.entrypoints=exam"
+      - "traefik.http.services.django.loadbalancer.server.port=8000"
+
+      # 👇 strip prefix
+      - "traefik.http.middlewares.stripstudentprefix.stripprefix.prefixes=/s65114540451"
+      - "traefik.http.routers.django.middlewares=stripstudentprefix"
+
+
   db:
-    image: postgres:16
-    container_name: pgdb
+    image: postgres:15
     environment:
-      TZ: Asia/Bangkok
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - pg_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-postgres}"]
-      interval: 5s
-      timeout: 5s
-      retries: 30
-    restart: unless-stopped
+      - postgres_data:/var/lib/postgresql/data
 
-  web:
-    build: .
-    container_name: web
-    env_file:
-      - .env
-    environment:
-      TZ: Asia/Bangkok
-      PYTHONUNBUFFERED: "1"
-    # ไม่ publish port ออก host เมื่ออยู่หลัง Traefik;
-    # ถ้าอยากทดสอบเดี่ยวในเครื่องตัวเอง ให้เปิดบรรทัดถัดไปแทน:
-    # ports:
-    #   - "${EXTERNAL_WEB_PORT}:8080"
+  traefik:
+    image: traefik:v3.1
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+
+      # 👇 entrypoint ฟังที่ port 10451
+      - "--entrypoints.exam.address=:10451"
+    ports:
+      - "10451:10451"
+      - "8080:8080" # Traefik dashboard (optional)
     volumes:
-      - ./media:/app/media
-      - ./staticfiles:/app/staticfiles
-      # **ตามคำแนะนำอาจารย์** ไม่แนะนำ map static volume ทับกันในงานจริง
-      # ถ้าจำเป็นเฉพาะหน้า ใช้ได้ตามนี้ที่เครื่องตัวเอง
-    depends_on:
-      db:
-        condition: service_healthy
-    command: >
-      sh -c '
-        echo "⏳ waiting for postgres at ${DB_HOST:-db}:${DB_PORT:-5432} ...";
-        i=0; until nc -z "${DB_HOST:-db}" "${DB_PORT:-5432}"; do
-          i=$$((i+1)); [ $$i -ge 60 ] && echo "❌ DB not ready in 60s" && exit 1;
-          echo "... retry $$i"; sleep 1;
-        done;
-        python manage.py migrate --noinput || exit 1;
-        python manage.py collectstatic --noinput || true;
-        exec gunicorn project.wsgi:application \
-          --bind 0.0.0.0:8080 \
-          --workers ${GUNICORN_WORKERS:-3} \
-          --timeout ${GUNICORN_TIMEOUT:-60} \
-          --max-requests ${GUNICORN_MAX_REQUESTS:-1000} \
-          --max-requests-jitter ${GUNICORN_MAX_REQUESTS_JITTER:-50}
-      '
-    healthcheck:
-      test: ["CMD-SHELL", "nc -z 127.0.0.1 8080 || exit 1"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.${STUDENT_ID}.entrypoints=web"
-      - "traefik.http.routers.${STUDENT_ID}.rule=PathPrefix(`${SUBPATH}`)"
-      - "traefik.http.routers.${STUDENT_ID}.middlewares=${STUDENT_ID}-strip"
-      - "traefik.http.middlewares.${STUDENT_ID}-strip.stripPrefix.prefixes=${SUBPATH}"
-      - "traefik.http.services.${STUDENT_ID}.loadbalancer.server.port=8080"
-    networks:
-      - default
-      - traefik-public
-    restart: unless-stopped
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
 volumes:
-  pg_data: {}
-
-networks:
-  traefik-public:
-    external: true
+  postgres_data:

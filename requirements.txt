@@ -15,4 +15,6 @@ PyJWT
 cryptography
 python-decouple
 whitenoise>=6.6
+cloudinary
+django-cloudinary-storage
 
