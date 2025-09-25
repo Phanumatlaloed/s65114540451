@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
             
             try {
                 // Use the URL format that matches exactly what you're trying to access
-                const response = await fetch(`/community/group/${groupId}/delete/`, {
+                const response = await fetch(`/s65114540451/community/group/${groupId}/delete/`, {
                     method: "POST",
                     headers: {
                         "X-CSRFToken": csrfToken,

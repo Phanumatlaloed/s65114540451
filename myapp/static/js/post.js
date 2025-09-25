@@ -1,15 +1,25 @@
 document.addEventListener("DOMContentLoaded", function () {
     const postForm = document.getElementById("postForm");
+    if (!postForm) return;
+
+    // base path จาก FORCE_SCRIPT_NAME
+    const BASE_PATH = "/s65114540451";
+
     postForm.addEventListener("submit", function (e) {
         e.preventDefault();
 
         const formData = new FormData(postForm);
-        fetch("/create_post/", {
+        fetch(`/s65114540451/create_post/`, {   // ✅ ใช้ BASE_PATH
             method: "POST",
             body: formData,
-            headers: { "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value },
+            headers: {
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+            },
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 window.location.reload();

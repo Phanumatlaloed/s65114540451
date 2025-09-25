@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // สร้าง CSRF token
             const csrftoken = getCSRFToken();
             
-            fetch(`/remove_saved_post/${postId}/`, {
+            fetch(`/s65114540451/remove_saved_post/${postId}/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": csrftoken,
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // สร้าง CSRF token
             const csrftoken = getCSRFToken();
             
-            fetch(`/community/${groupId}/group/post/${postId}/unsave/`, {
+            fetch(`/s65114540451/community/${groupId}/group/post/${postId}/unsave/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": csrftoken,

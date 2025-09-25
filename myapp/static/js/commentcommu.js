@@ -46,8 +46,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // แก้ไข URL ตามบริบทให้ตรงกับ URL pattern ที่กำหนดใน path
             const url = groupId 
-                ? `/group_post/${postId}/add_comment/` // ใช้ path ที่มีอยู่จริง
-                : `/group_post/${postId}/add_comment/`;
+                ? `/s65114540451/group_post/${postId}/add_comment/` // ใช้ path ที่มีอยู่จริง
+                : `/s65114540451/group_post/${postId}/add_comment/`;
 
             try {
                 const response = await fetch(url, {
@@ -143,8 +143,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 
                 // แก้ไข URL ตามบริบทให้ตรงกับ URL pattern ที่กำหนดใน path
                 const url = groupId 
-                    ? `/community/${groupId}/group_comment/${commentId}/delete/` // ใช้ path ที่กำหนดในรายการ path
-                    : `/group_comment/${commentId}/delete/`;
+                    ? `/s65114540451/community/${groupId}/group_comment/${commentId}/delete/` // ใช้ path ที่กำหนดในรายการ path
+                    : `/s65114540451/group_comment/${commentId}/delete/`;
 
                 try {
                     const response = await fetch(url, {
@@ -328,8 +328,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 
                 // สร้าง URL ตามบริบท (กลุ่มหรือไม่)
                 const url = groupId 
-                    ? `/group_comment/${commentId}/edit/` // ใช้ path ที่มีอยู่จริง
-                    : `/group_comment/${commentId}/edit/`;
+                    ? `/s65114540451/group_comment/${commentId}/edit/` // ใช้ path ที่มีอยู่จริง
+                    : `/s65114540451/group_comment/${commentId}/edit/`;
                 
                 try {
                     saveBtn.disabled = true;

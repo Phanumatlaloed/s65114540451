@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // ดึง CSRF Token
         let csrfToken = document.querySelector("meta[name='csrf-token']").content;
 
-        fetch(`/update-address/${orderId}/`, {
+        fetch(`/s65114540451/update-address/${orderId}/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",

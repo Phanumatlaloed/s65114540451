@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
             let postId = this.dataset.postId;
             let btn = this;
             
-            fetch(`/save/${postId}/`, {
+            fetch(`/s65114540451/save/${postId}/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
             let postId = this.dataset.postId;
             let card = this.closest(".col-md-6, .col-lg-4");
             
-            fetch(`/remove_saved_post/${postId}/`, {
+            fetch(`/s65114540451/remove_saved_post/${postId}/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),

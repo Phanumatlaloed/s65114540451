@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const postId = this.getAttribute("data-post-id");
 
             try {
-                const data = await apiFetch(`/post/${postId}/share/`, {
+                const data = await apiFetch(`/s65114540451/post/${postId}/share/`, {
                     method: "POST",
                 });
 

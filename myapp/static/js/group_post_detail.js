@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
             let postId = this.dataset.postId;
             let likeCount = document.getElementById(`like-count-${postId}`);
 
-            fetch(`/like/${postId}/`, {
+            fetch(`/s65114540451/like/${postId}/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function () {
             let postId = this.dataset.postId;
 
-            fetch(`/save/${postId}/`, {
+            fetch(`/s65114540451/save/${postId}/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function () {
             let postId = this.dataset.postId;
 
-            fetch(`/post/${postId}/share/`, {
+            fetch(`/s65114540451/post/${postId}/share/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),

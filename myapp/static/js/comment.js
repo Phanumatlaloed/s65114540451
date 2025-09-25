@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function() {
             submitButton.disabled = true;
             
             try {
-                let response = await fetch(`/add_comment/${postId}/`, {
+                let response = await fetch(`/s65114540451/add_comment/${postId}/`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     try {
                         const csrfToken = document.querySelector("input[name='csrfmiddlewaretoken']").value;
                         
-                        let response = await fetch(`/comment/edit/${commentId}/`, {
+                        let response = await fetch(`/s65114540451/comment/edit/${commentId}/`, {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/x-www-form-urlencoded",
@@ -225,7 +225,7 @@ document.addEventListener("DOMContentLoaded", function() {
         try {
             const csrfToken = document.querySelector("input[name='csrfmiddlewaretoken']").value;
             
-            let response = await fetch(`/comment/delete/${commentId}/`, {
+            let response = await fetch(`/s65114540451/comment/delete/${commentId}/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

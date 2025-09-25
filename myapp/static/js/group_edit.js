@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log(`📌 Trying to delete media ID: ${mediaId}, Group ID: ${groupId}`);
 
             // URL is same for both group and regular posts
-            fetch(`/delete_media/${mediaId}/`, {
+            fetch(`/s65114540451/delete_media/${mediaId}/`, {
                 method: "DELETE",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),

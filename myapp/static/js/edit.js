@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 saveButton.addEventListener("click", function () {
                     let newText = inputField.value;
                     
-                    fetch(`/edit_comment/${commentId}/`, {
+                    fetch(`/s65114540451/edit_comment/${commentId}/`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function () {
             const mediaId = this.getAttribute("data-file-id");
 
-            fetch(`/delete_media/${mediaId}/`, {
+            fetch(`/s65114540451/delete_media/${mediaId}/`, {
                 method: "DELETE",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),

@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function() {
             event.preventDefault();
             let productId = this.getAttribute("data-product-id");
 
-            fetch(`/cart/add/${productId}/`, {
+            fetch(`/s65114540451/cart/add/${productId}/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(), // ✅ ใช้ฟังก์ชันดึง CSRF Token

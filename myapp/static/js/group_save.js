@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
             
             console.log(`📌 Saving post: ${postId} in group: ${groupId}`);
 
-            fetch(`/community/${groupId}/group/post/${postId}/save/`, { 
+            fetch(`/s65114540451/community/${groupId}/group/post/${postId}/save/`, { 
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),

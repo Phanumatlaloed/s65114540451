@@ -1,5 +1,5 @@
 function loadNotifications() {
-    fetch("/api/notifications/")
+    fetch("/s65114540451/api/notifications/")
         .then(response => response.json())
         .then(data => {
             const notificationList = document.getElementById("notification-list");

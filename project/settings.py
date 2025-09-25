@@ -115,23 +115,20 @@ FORCE_SCRIPT_NAME = os.getenv("SUBPATH", "")
 
 FORCE_SCRIPT_NAME = "/s65114540451"
 
-# Static
+# Static files
 STATIC_URL = (FORCE_SCRIPT_NAME + "/static/").replace("//", "/")
+STATICFILES_DIRS = [BASE_DIR / "myapp" / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]
 
-# Media & Cloudinary
+# ใช้ Cloudinary สำหรับ media
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 STATICFILES_STORAGE = "cloudinary_storage.storage.StaticHashedCloudinaryStorage"
-
-# MEDIA_URL ไม่ต้องเป็น /media/ เพราะใช้ Cloudinary
-CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME", "")
-MEDIA_URL = f"https://res.cloudinary.com/{CLOUD_NAME}/" if CLOUD_NAME else "/media/"
 
 STORAGES = {
     "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
     "staticfiles": {"BACKEND": "cloudinary_storage.storage.StaticHashedCloudinaryStorage"},
 }
+
 
 # ===== Sessions =====
 SESSION_ENGINE = "django.contrib.sessions.backends.db"

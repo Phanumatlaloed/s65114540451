@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            fetch(`/like/${postId}/`, {
+            fetch(`/s65114540451/like/${postId}/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),

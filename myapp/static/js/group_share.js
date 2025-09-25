@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            fetch(`/community/${groupId}/group/post/${postId}/share/`, {
+            fetch(`/s65114540451/community/${groupId}/group/post/${postId}/share/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            fetch(`/group_post/${postId}/share/`, {
+            fetch(`/s65114540451/group_post/${postId}/share/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),
